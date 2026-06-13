@@ -18,22 +18,22 @@ export class AudioEngine {
       this.gainNode = this.ctx.createGain();
       this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
       // Soft fade in to prevent clicking sound
-      this.gainNode.gain.linearRampToValueAtTime(0.04, this.ctx.currentTime + 2.0);
+      this.gainNode.gain.linearRampToValueAtTime(0.08, this.ctx.currentTime + 2.0);
 
       // Lowpass filter to create a deep warm sub bass / drone
       this.filter = this.ctx.createBiquadFilter();
       this.filter.type = "lowpass";
-      this.filter.frequency.setValueAtTime(120, this.ctx.currentTime);
+      this.filter.frequency.setValueAtTime(350, this.ctx.currentTime);
 
-      // Oscillator 1 (Deep base drone)
+      // Oscillator 1 (Warm fundamentals)
       this.osc1 = this.ctx.createOscillator();
       this.osc1.type = "sine";
-      this.osc1.frequency.setValueAtTime(75, this.ctx.currentTime); // Eb2/D2 range
+      this.osc1.frequency.setValueAtTime(150, this.ctx.currentTime); // Eb3 range, audible on speakers
 
-      // Oscillator 2 (Wobble / detuned voice)
+      // Oscillator 2 (Wobble / detuned voice for chorus effect)
       this.osc2 = this.ctx.createOscillator();
       this.osc2.type = "triangle";
-      this.osc2.frequency.setValueAtTime(75.5, this.ctx.currentTime); // Slight detuning for warmth
+      this.osc2.frequency.setValueAtTime(150.6, this.ctx.currentTime); // Slight detuning for warmth
 
       // Connect nodes
       this.osc1.connect(this.filter);
@@ -45,6 +45,11 @@ export class AudioEngine {
       this.osc1.start(0);
       this.osc2.start(0);
       this.isPlaying = true;
+
+      // Force resume context if suspended by browser autoplay policies
+      if (this.ctx.state === "suspended") {
+        this.ctx.resume();
+      }
     } catch (e) {
       console.warn("Failed to initialize audio engine:", e);
     }
